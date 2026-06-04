@@ -9,10 +9,21 @@ async function request(endpoint, options = {}) {
   if (config.body && typeof config.body === 'object' && !(config.body instanceof FormData)) {
     config.body = JSON.stringify(config.body);
   }
-  const res = await fetch(`${API_BASE}${endpoint}`, config);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Request failed');
-  return data;
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, config);
+    const data = await res.json();
+    if (!res.ok) {
+      console.error(`API Error ${res.status}:`, data);
+      throw new Error(data.message || `Request failed with status ${res.status}`);
+    }
+    return data;
+  } catch (err) {
+    console.error(`API Request Failed:`, err);
+    if (err instanceof TypeError) {
+      throw new Error('Network error - is the backend running?');
+    }
+    throw err;
+  }
 }
 
 const api = {
@@ -41,6 +52,7 @@ const api = {
   updateReservation: (id, body) => request(`/reservations/${id}`, { method: 'PUT', body }),
   deleteReservation: (id) => request(`/reservations/${id}`, { method: 'DELETE' }),
   getMyReservations: () => request('/reservations/my'),
+  getReport: () => request('/reservations/report'),
 
   getUsers: () => request('/users'),
   getUser: (id) => request(`/users/${id}`),

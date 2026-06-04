@@ -12,6 +12,7 @@ import Reservations from './components/Reservations'
 import CustomerDashboard from './components/CustomerDashboard'
 import CustomerSignup from './components/CustomerSignup'
 import Staff from './components/Staff'
+import Report from './components/Report'
 
 function ProtectedRoute({ children, user }) {
   if (!user) return <Navigate to="/" replace />
@@ -123,6 +124,16 @@ function App() {
               <ProtectedRoute user={user}>
                 <Layout user={user} onLogout={handleLogout}>
                   <Staff />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/report"
+            element={
+              <ProtectedRoute user={user}>
+                <Layout user={user} onLogout={handleLogout}>
+                  <Report />
                 </Layout>
               </ProtectedRoute>
             }

@@ -49,10 +49,28 @@ app.use(session({
 app.use('/api', routes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Car Rental API is running.' });
+  res.json({ message: 'VRS is running.' });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 4000;
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Is another server running?`);
+    process.exit(1);
+  }
+  console.error('Server error:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
 });

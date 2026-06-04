@@ -8,6 +8,7 @@ const navItems = [
   { to: '/vehicles', label: 'Vehicles' },
   { to: '/reservations', label: 'Reservations' },
   { to: '/staff', label: 'Staff' },
+  { to: '/report', label: 'Report' },
 ]
 
 export default function Layout({ children, user, onLogout }) {

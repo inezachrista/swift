@@ -73,6 +73,15 @@ const reservationRentalController = {
     } catch (error) {
       return res.status(500).json({ message: 'Server error.', error: error.message });
     }
+  },
+
+  async getReport(req, res) {
+    try {
+      const report = await ReservationRental.getReport();
+      return res.status(200).json(report);
+    } catch (error) {
+      return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
   }
 };
 

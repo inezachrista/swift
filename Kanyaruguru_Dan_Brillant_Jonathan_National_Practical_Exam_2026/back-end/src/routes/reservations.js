@@ -5,6 +5,7 @@ const { requireAuth, requireCustomerAuth } = require('../middleware/auth');
 const router = Router();
 
 router.get('/my', requireCustomerAuth, reservationRentalController.getMyReservations);
+router.get('/report', requireAuth, reservationRentalController.getReport);
 router.get('/', requireAuth, reservationRentalController.getAll);
 router.get('/:id', requireAuth, reservationRentalController.getById);
 router.post('/', requireAuth, reservationRentalController.create);

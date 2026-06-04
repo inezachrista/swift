@@ -92,6 +92,32 @@ const ReservationRental = {
   async delete(id) {
     const [result] = await pool.query('DELETE FROM Reservation_Rental WHERE id = ?', [id]);
     return result.affectedRows > 0;
+  },
+
+  async getReport() {
+    const [rows] = await pool.query(`
+      SELECT
+        c.Full_Name AS CustomerName,
+        c.National_ID AS CustomerNationalID,
+        c.Phone AS CustomerPhone,
+        v.Plate_Number AS VehiclePlate,
+        v.Brand AS VehicleBrand,
+        v.Model AS VehicleModel,
+        v.Year AS VehicleYear,
+        v.Vehicle_Type AS VehicleType,
+        r.Reservation_Date,
+        r.Start_Date,
+        r.End_Date,
+        r.Reservation_Status,
+        r.Rental_Date,
+        r.Rental_Fee,
+        r.Rental_Status
+      FROM Reservation_Rental r
+      LEFT JOIN Customer c ON r.customer_id = c.id
+      LEFT JOIN Vehicle v ON r.vehicle_id = v.id
+      ORDER BY r.Start_Date DESC
+    `);
+    return rows;
   }
 };
 

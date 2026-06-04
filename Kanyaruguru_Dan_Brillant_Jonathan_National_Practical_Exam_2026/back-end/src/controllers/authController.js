@@ -64,8 +64,12 @@ const authController = {
       const customer = await Customer.create(req.body);
       return res.status(201).json({ message: 'Account created successfully.', customer });
     } catch (error) {
+      console.error('Customer signup error:', error);
       if (error.code === 'ER_DUP_ENTRY') {
         return res.status(409).json({ message: 'National ID already exists.' });
+      }
+      if (error.code === 'ER_BAD_FIELD_ERROR' || error.code === 'ER_NO_SUCH_TABLE') {
+        return res.status(500).json({ message: 'Database configuration error. Please ensure the database is set up.' });
       }
       return res.status(500).json({ message: 'Server error.', error: error.message });
     }
@@ -99,6 +103,7 @@ const authController = {
         customer: { id: customer.id, Full_Name: customer.Full_Name, National_ID: customer.National_ID }
       });
     } catch (error) {
+      console.error('Customer login error:', error);
       return res.status(500).json({ message: 'Server error.', error: error.message });
     }
   },

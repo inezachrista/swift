@@ -196,7 +196,6 @@ export default function Vehicles() {
               <option value="Truck">Truck</option>
               <option value="Van">Van</option>
               <option value="Coupe">Coupe</option>
-              <option value="Convertible">Convertible</option>
             </select>
           </div>
           <div>
