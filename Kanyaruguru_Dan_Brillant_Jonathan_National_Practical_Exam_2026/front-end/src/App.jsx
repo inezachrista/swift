@@ -1,121 +1,136 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import api from './services/api'
+import { ToastProvider } from './components/Toast'
+import Login from './components/Login'
+import Signup from './components/Signup'
+import Layout from './components/Layout'
+import Dashboard from './components/Dashboard'
+import Customers from './components/Customers'
+import Vehicles from './components/Vehicles'
+import Reservations from './components/Reservations'
+import CustomerDashboard from './components/CustomerDashboard'
+import CustomerSignup from './components/CustomerSignup'
+import Staff from './components/Staff'
+
+function ProtectedRoute({ children, user }) {
+  if (!user) return <Navigate to="/" replace />
+  return children
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null)
+  const [customer, setCustomer] = useState(null)
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    api.me()
+      .then((data) => {
+        if (data.user) setUser(data.user)
+        if (data.customer) setCustomer(data.customer)
+      })
+      .catch(() => {})
+      .finally(() => setChecking(false))
+  }, [])
+
+  function handleLogin(userData) {
+    setUser(userData)
+    setCustomer(null)
+  }
+
+  function handleCustomerLogin(customerData) {
+    setCustomer(customerData)
+    setUser(null)
+  }
+
+  function handleLogout() {
+    setUser(null)
+    setCustomer(null)
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    )
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <BrowserRouter>
+      <ToastProvider>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              user ? <Navigate to="/dashboard" replace /> :
+              customer ? <Navigate to="/my-account" replace /> :
+              <Login onLogin={handleLogin} onCustomerLogin={handleCustomerLogin} />
+            }
+          />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/customer-signup" element={<CustomerSignup />} />
+          <Route
+            path="/my-account"
+            element={
+              customer ? <CustomerDashboard customer={customer} onLogout={handleLogout} /> :
+              <Navigate to="/" replace />
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute user={user}>
+                <Layout user={user} onLogout={handleLogout}>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customers"
+            element={
+              <ProtectedRoute user={user}>
+                <Layout user={user} onLogout={handleLogout}>
+                  <Customers />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vehicles"
+            element={
+              <ProtectedRoute user={user}>
+                <Layout user={user} onLogout={handleLogout}>
+                  <Vehicles />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservations"
+            element={
+              <ProtectedRoute user={user}>
+                <Layout user={user} onLogout={handleLogout}>
+                  <Reservations />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff"
+            element={
+              <ProtectedRoute user={user}>
+                <Layout user={user} onLogout={handleLogout}>
+                  <Staff />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ToastProvider>
+    </BrowserRouter>
   )
 }
 

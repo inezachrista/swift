@@ -1,9 +1,19 @@
 const pool = require('../config/database');
 
 const ReservationRental = {
-  async findAll() {
+  async findAll(search) {
+    if (search) {
+      const [rows] = await pool.query(`
+        SELECT r.*, c.Full_Name AS CustomerName, v.Plate_Number AS VehiclePlate
+        FROM Reservation_Rental r
+        LEFT JOIN Customer c ON r.customer_id = c.id
+        LEFT JOIN Vehicle v ON r.vehicle_id = v.id
+        WHERE c.Full_Name LIKE ? OR v.Plate_Number LIKE ? OR r.Reservation_Status LIKE ? OR r.id LIKE ?
+      `, [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`]);
+      return rows;
+    }
     const [rows] = await pool.query(`
-      SELECT r.*, c.Full_Nmae AS CustomerName, v.Plate_Number AS VehiclePlate
+      SELECT r.*, c.Full_Name AS CustomerName, v.Plate_Number AS VehiclePlate
       FROM Reservation_Rental r
       LEFT JOIN Customer c ON r.customer_id = c.id
       LEFT JOIN Vehicle v ON r.vehicle_id = v.id
@@ -11,9 +21,22 @@ const ReservationRental = {
     return rows;
   },
 
+  async findByCustomer(customerId) {
+    const [rows] = await pool.query(`
+      SELECT r.*, c.Full_Name AS CustomerName, v.Plate_Number AS VehiclePlate,
+             v.Brand AS VehicleBrand, v.Model AS VehicleModel
+      FROM Reservation_Rental r
+      LEFT JOIN Customer c ON r.customer_id = c.id
+      LEFT JOIN Vehicle v ON r.vehicle_id = v.id
+      WHERE r.customer_id = ?
+      ORDER BY r.Start_Date DESC
+    `, [customerId]);
+    return rows;
+  },
+
   async findById(id) {
     const [rows] = await pool.query(`
-      SELECT r.*, c.Full_Nmae AS CustomerName, v.Plate_Number AS VehiclePlate
+      SELECT r.*, c.Full_Name AS CustomerName, v.Plate_Number AS VehiclePlate
       FROM Reservation_Rental r
       LEFT JOIN Customer c ON r.customer_id = c.id
       LEFT JOIN Vehicle v ON r.vehicle_id = v.id
@@ -49,7 +72,7 @@ const ReservationRental = {
       Reservation_Date, Start_Date, End_Date, Reservation_Status,
       Rental_Date, Return_Date, Rental_Fee, Rental_Status
     } = data;
-    await pool.query(
+    await pool.query( 
       `UPDATE Reservation_Rental SET
        customer_id = ?, vehicle_id = ?, user_id = ?,
        Reservation_Date = ?, Start_Date = ?, End_Date = ?,

@@ -1,8 +1,8 @@
 const express = require('express');
-const path = require('path');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const routes = require('./routes');
@@ -48,10 +48,8 @@ app.use(session({
 
 app.use('/api', routes);
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+app.get('/', (req, res) => {
+  res.json({ message: 'Car Rental API is running.' });
 });
 
 const PORT = process.env.PORT || 3000;

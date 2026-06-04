@@ -1,9 +1,20 @@
 const ReservationRental = require('../models/ReservationRental');
 
 const reservationRentalController = {
+  async getMyReservations(req, res) {
+    try {
+      const customerId = req.session.customer.id;
+      const reservations = await ReservationRental.findByCustomer(customerId);
+      return res.status(200).json(reservations);
+    } catch (error) {
+      return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+  },
+
   async getAll(req, res) {
     try {
-      const reservations = await ReservationRental.findAll();
+      const { search } = req.query;
+      const reservations = await ReservationRental.findAll(search);
       return res.status(200).json(reservations);
     } catch (error) {
       return res.status(500).json({ message: 'Server error.', error: error.message });

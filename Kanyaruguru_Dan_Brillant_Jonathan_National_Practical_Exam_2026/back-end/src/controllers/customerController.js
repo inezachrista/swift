@@ -3,7 +3,8 @@ const Customer = require('../models/Customer');
 const customerController = {
   async getAll(req, res) {
     try {
-      const customers = await Customer.findAll();
+      const { search } = req.query;
+      const customers = await Customer.findAll(search);
       return res.status(200).json(customers);
     } catch (error) {
       return res.status(500).json({ message: 'Server error.', error: error.message });
@@ -24,9 +25,9 @@ const customerController = {
 
   async create(req, res) {
     try {
-      const { Full_Nmae, National_ID, Phone, Email, Address } = req.body;
-      if (!Full_Nmae || !National_ID || !Phone) {
-        return res.status(400).json({ message: 'Full_Nmae, National_ID, and Phone are required.' });
+      const { Full_Name, National_ID, Phone, Email, Address } = req.body;
+      if (!Full_Name || !National_ID || !Phone) {
+        return res.status(400).json({ message: 'Full_Name, National_ID, and Phone are required.' });
       }
       const customer = await Customer.create(req.body);
       return res.status(201).json(customer);

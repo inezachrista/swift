@@ -1,7 +1,14 @@
 const pool = require('../config/database');
 
 const Vehicle = {
-  async findAll() {
+  async findAll(search) {
+    if (search) {
+      const [rows] = await pool.query(
+        `SELECT * FROM Vehicle WHERE Plate_Number LIKE ? OR Brand LIKE ? OR Model LIKE ? OR Vehicle_Type LIKE ?`,
+        [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`]
+      );
+      return rows;
+    }
     const [rows] = await pool.query('SELECT * FROM Vehicle');
     return rows;
   },
