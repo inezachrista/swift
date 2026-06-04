@@ -12,7 +12,7 @@ const Customer = {
   },
 
   async create(data) {
-    const { Full_Nmae, National_ID, Phone, Email, Address } = data;
+    const {Full_Nmae, National_ID, Phone, Email, Address} = data;
     const [result] = await pool.query(
       'INSERT INTO Customer (Full_Nmae, National_ID, Phone, Email, Address) VALUES (?, ?, ?, ?, ?)',
       [Full_Nmae, National_ID, Phone, Email, Address]

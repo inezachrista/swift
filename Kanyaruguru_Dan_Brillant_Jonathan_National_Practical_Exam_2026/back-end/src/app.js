@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors');
@@ -38,16 +39,19 @@ app.use(session({
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: parseInt(process.env.SESSION_EXPIRY) || 86400000
   }
 }));
 
 app.use('/api', routes);
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Car Rental API is running.' });
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
