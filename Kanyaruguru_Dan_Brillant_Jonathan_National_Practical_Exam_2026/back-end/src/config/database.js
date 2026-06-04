@@ -12,6 +12,23 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+async function migrate() {
+  try {
+    const conn = await pool.getConnection();
+    const [rows] = await conn.execute(
+      `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Customer' AND COLUMN_NAME = 'Password'`,
+      [process.env.DB_NAME || 'vrs']
+    );
+    if (rows.length === 0) {
+      await conn.execute(
+        'ALTER TABLE Customer ADD COLUMN Password VARCHAR(255) NOT NULL AFTER Address'
+      );
+    }
+    conn.release();
+  } catch {}
+}
+
+migrate();
+
 module.exports = pool;
-
-

@@ -25,11 +25,14 @@ const customerController = {
 
   async create(req, res) {
     try {
-      const { Full_Name, National_ID, Phone, Email, Address } = req.body;
+      const { Full_Name, National_ID, Phone, Email, Address, Password } = req.body;
       if (!Full_Name || !National_ID || !Phone) {
         return res.status(400).json({ message: 'Full_Name, National_ID, and Phone are required.' });
       }
-      const customer = await Customer.create(req.body);
+      if (!Password) {
+        return res.status(400).json({ message: 'Password is required.' });
+      }
+      const customer = await Customer.create({ Full_Name, National_ID, Phone, Email, Address, Password });
       return res.status(201).json(customer);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
